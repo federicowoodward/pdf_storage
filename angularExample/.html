@@ -1,0 +1,7 @@
+<ul>
+    <li *ngFor="let doc of documents">
+      {{ doc.title }}
+      <button (click)="downloadDoc(doc)">Descargar</button>
+    </li>
+  </ul>
+  
