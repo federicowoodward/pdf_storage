@@ -1,4 +1,4 @@
-const { EntitySchema } = require('typeorm');
+const { EntitySchema } = require("typeorm");
 
 module.exports = new EntitySchema({
   name: "Document",
@@ -34,5 +34,5 @@ module.exports = new EntitySchema({
       type: "timestamp",
       updateDate: true,
     },
-  }
+  },
 });

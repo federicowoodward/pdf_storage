@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const upload = multer(); // in-memory
 const service = require("../services/document.service");
+const categories = require("../utils/categories");
 
 const router = express.Router();
 
@@ -10,6 +11,7 @@ const router = express.Router();
  * /documents:
  *   post:
  *     summary: Sube un documento PDF
+ *     tags: [Documents]
  *     consumes:
  *       - multipart/form-data
  *     requestBody:
@@ -35,6 +37,14 @@ const router = express.Router();
 router.post("/", upload.single("file"), async (req, res) => {
   try {
     const { title, description, category } = req.body;
+
+    if (!categories.includes(category)) {
+      return res.status(400).json({
+        error: `Categoría inválida: {${category}}. Debe ser una de:`,
+        disponibles: categories,
+      });
+    }
+
     const doc = await service.uploadDocument({
       file: req.file,
       title,
@@ -52,6 +62,7 @@ router.post("/", upload.single("file"), async (req, res) => {
  * /documents:
  *   get:
  *     summary: Lista todos los documentos
+ *     tags: [Documents]
  *     responses:
  *       200:
  *         description: Listado de documentos
@@ -70,6 +81,7 @@ router.get("/", async (req, res) => {
  * /documents/{id}/download:
  *   get:
  *     summary: Descarga un documento PDF
+ *     tags: [Documents]
  *     parameters:
  *       - in: path
  *         name: id
@@ -95,6 +107,7 @@ router.get("/:id/download", async (req, res) => {
  * /documents/{id}:
  *   put:
  *     summary: Edita los metadatos del documento
+ *     tags: [Documents]
  *     parameters:
  *       - in: path
  *         name: id
@@ -132,6 +145,7 @@ router.put("/:id", async (req, res) => {
  * /documents/{id}:
  *   delete:
  *     summary: Elimina un documento
+ *     tags: [Documents]
  *     parameters:
  *       - in: path
  *         name: id

@@ -16,8 +16,48 @@ function handleError(context, error) {
   throw error;
 }
 
+function mapResponse(docs) {
+  const categoriesMap = {};
+
+  docs.forEach((doc) => {
+    const catId = doc.category || "sin_categoria";
+    if (!categoriesMap[catId]) {
+      categoriesMap[catId] = {
+        id: catId,
+        title: catId, // si querés podés capitalizar o mapear un título más lindo
+        documents: [],
+      };
+    }
+    categoriesMap[catId].documents.push({
+      id: doc.id,
+      title: doc.title,
+      description: doc.description || "",
+      downloadUrl: doc.downloadUrl,
+      // Otros campos si tenés
+    });
+  });
+
+  // Ordená las categorías alfabéticamente por title si querés
+  const categories = Object.values(categoriesMap).sort((a, b) =>
+    a.title.localeCompare(b.title)
+  );
+
+  // Y dentro de cada categoría, ordená los docs por title
+  categories.forEach((cat) => {
+    cat.documents.sort((a, b) => a.title.localeCompare(b.title));
+  });
+
+  return categories;
+}
+
 const uploadDocument = async ({ file, title, description, category }) => {
   let s3Key;
+
+  //validar categoria 
+  if (!categories.includes(category)) {
+    return;
+  }
+
   try {
     s3Key = `${Date.now()}_${file.originalname}`;
     await s3.send(
@@ -54,8 +94,9 @@ const listDocuments = async () => {
   try {
     const repo = AppDataSource.getRepository("Document");
     const docs = await repo.find();
+    const response = mapResponse(docs);
     logger.info("Listando documentos", `Total: ${docs.length}`);
-    return docs;
+    return response;
   } catch (e) {
     handleError("Fallo listDocuments", e);
   }
